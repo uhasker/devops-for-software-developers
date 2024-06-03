@@ -1,0 +1,6 @@
+[book]
+authors = ["uhasker"]
+language = "en"
+multilingual = false
+src = "src"
+title = "DevOps for Software Developers"
