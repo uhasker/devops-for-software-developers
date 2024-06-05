@@ -1,6 +1,63 @@
 # Services
 
-Create a service file at `/etc/systemd/system/example.service`:
+## A Simple Example
+
+Let's consider a simple example web server written in Python and Flask.
+
+First, you might need to install a few requirements (unless already present):
+
+```sh
+sudo apt update && sudo apt upgrade
+sudo apt install python3 python3-pip
+python -m pip install flask gunicorn
+```
+
+Create a simple file called `app.py`:
+
+```python
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/hello', methods=['GET'])
+def hello():
+    return "Hello, world!"
+```
+
+You can start a production-ready server like this:
+
+```sh
+python3 -m gunicorn -w 4 -b 0.0.0.0:8000 app:app
+```
+
+You should be able to request the `hello` endpoint by logging in on the server and querying the endpoint on `127.0.0.1`:
+
+```console
+$ curl 127.0.0.1:8000/hello
+Hello, world!
+```
+
+Of course, we can't actually run a web server by typing a command in a terminal.
+If we close the terminal, the web server will stop which is not really what we want.
+
+Instead, we want to run the web server as a "background" process.
+
+## Managing Services with Systemd
+
+The simplest way to accomplish this is to use a service manager called `systemd`.
+This should be installed by default on your Linux distribution.
+
+You can see all running services like this:
+
+```sh
+systemctl list-units --type=service --state=running
+```
+
+This will probably output a whole bunch of stuff, potentially including an SSH server, a Bluetooth service, a D-Bus system message bus and many more.
+
+Let's now add our web server as a `systemd` service.
+
+First, we need to create a service file at `/etc/systemd/system/example.service`:
 
 ```
 [Unit]
@@ -29,25 +86,25 @@ The "ExecStart" defines the command to start the service.
 
 The "WantedBy=multi-user.target" is relatively complicated, but basically this is the standard system target for non-graphical multi-user systems (which most servers are).
 
-Now you need to reload the systemd manager configuration:
+Second, we need to reload the `systemd` manager configuration:
 
 ```sh
 sudo systemctl daemon-reload
 ```
 
-Finally start the service:
+And finally we can start the service:
 
 ```sh
 sudo systemctl start example
 ```
 
-You should also enable it to run on boot:
+If you want to also enable the service to run on boot, you can do it like this:
 
 ```sh
 sudo systemctl enable example
 ```
 
-Look at the status:
+Let's have a look at the status:
 
 ```sh
 systemctl status example
@@ -78,4 +135,11 @@ Jun 03 11:18:28 ip-172-31-31-82 python[8744]: [2024-06-03 11:18:28 +0000] [8744]
 Jun 03 11:18:28 ip-172-31-31-82 python[8745]: [2024-06-03 11:18:28 +0000] [8745] [INFO] Booting worker with pid: 8745
 Jun 03 11:18:28 ip-172-31-31-82 python[8746]: [2024-06-03 11:18:28 +0000] [8746] [INFO] Booting worker with pid: 8746
 Jun 03 11:18:28 ip-172-31-31-82 python[8747]: [2024-06-03 11:18:28 +0000] [8747] [INFO] Booting worker with pid: 8747
+```
+
+Again, try `curl`ing the endpoint:
+
+```console
+$ curl 127.0.0.1:8000/hello
+Hello, world!
 ```

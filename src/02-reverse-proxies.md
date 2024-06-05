@@ -46,28 +46,44 @@ server {
 }
 ```
 
-Enable the new config:
+The `server` block defines the configuration for a specific (virtual) server.
+
+The `listen 80` directive tells Nginx to listen on port 80 for incoming HTTP requests.
+
+The `server_name` specifies the server names this server will respond to.
+Currently we specified the wildcard `_` which means that this block will handle requests for any server name (that doesn't match another specific block).
+We will replace this wildcard with an actual domain in the domain chapter.
+
+The `location` block specifies how to process requests for a particular location.
+Here, we tell Nginx to forward all requests to `127.0.0.1:8000` (where our `gunicorn` service is running) using the `proxy_pass` directive.
+Additionally, we set HTTP headers to Nginx will include when forwarding requests to the backend server.
+
+Now that we have created, the file let's enable the new config.
+
+For this, you need to create a symlink from `sites-enabled` to `sites-available`:
 
 ```sh
 sudo ln -s /etc/nginx/sites-available/example /etc/nginx/sites-enabled/example
 ```
 
-You should also remove the default site:
+You should also remove the `default` symlink from `sites-enabled`:
 
 ```sh
 sudo trash-put /etc/nginx/sites-enabled/default
 ```
 
-Restart Nginx to apply the changes:
+Reload Nginx to apply the changes:
 
 ```sh
-sudo systemctl restart nginx
+sudo systemctl reload nginx
 ```
 
-You can now query `localhost:80`.
+Note that there is a difference between `systemctl restart` and `systemctl reload`.
+The first command completely stops the service and then starts it again.
+The second command only reloads the configuration files and applies changes without stopping the service.
 
-You can also query:
+Now that we've started our reverse proxy, you can `curl` your service at port `80` aswell:
 
-```
-curl 18.197.105.129:80/hello
+```sh
+curl 127.0.0.1:80/hello
 ```

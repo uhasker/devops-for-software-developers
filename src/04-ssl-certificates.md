@@ -35,38 +35,50 @@ This will also make changes to your nginx config:
 
 ```
 server {
-        server_name example.titanom.com;
+    server_name yourdomain.com;
 
-        location / {
-                proxy_pass http://127.0.0.1:8000;
-                proxy_set_header Host $host;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-        }
+    location / {
+            proxy_pass http://127.0.0.1:8000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+    }
 
     listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/example.titanom.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/example.titanom.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
 }
+
 server {
-    if ($host = example.titanom.com) {
+    listen 80;
+    server_name yourdomain.com;
+
+    if ($host = yourdomain.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
-
-        listen 80;
-        server_name example.titanom.com;
     return 404; # managed by Certbot
 }
 ```
 
-Restart nginx.
+Note the additional directives.
 
-Now you can curl yourdomain.com/hello.
+The `listen 443 ssl` directive tells Nginx to listen for HTTPS connections on port 443.
+We also specify the paths to the various files relevant for the SSL certificate.
+
+Additionally, there is an HTTP to HTTP redirection block.
+The purpose of this block is basically to redirect HTTP requests to the corresponding HTTPS URL ensuring additional security.
+
+Again, reload `nginx`.
+
+You should now be able to `curl` the site:
+
+```sh
+curl https://yourdomain.com/hello
+```
 
 ## Automatic Renewal
 
