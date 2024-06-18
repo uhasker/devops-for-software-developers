@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_APP=app.py
+      - SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@db:5432/taskdb
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskdb
+    ports:
+      - "5432:5432"
