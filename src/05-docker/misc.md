@@ -1,7 +1,3 @@
-# Docker
-
-Docker is for **containerization**, i.e. packaging an application together with its dependencies as an image and running it as a container.
-
 ## Example
 
 Example Dockerfile:
