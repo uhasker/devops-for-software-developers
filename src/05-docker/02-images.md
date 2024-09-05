@@ -25,6 +25,8 @@ REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
 nginx        latest    5ef79149e0ec   2 weeks ago     188MB
 ```
 
+You can use the `-a` flag to show all images (including the intermediate layers) and the `-q` flag to only show image IDs.
+
 ## Building an Image
 
 Alternatively, you can build an image yourself.
@@ -38,16 +40,13 @@ print("Hello, World!")
 
 Next, let's create a `Dockerfile`:
 
-```
+```dockerfile
 FROM python:3.9-slim
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
 COPY . /app
 
-# Run the Python script
 CMD ["python", "app.py"]
 ```
 
@@ -168,4 +167,22 @@ It's worth knowing that some images are "official".
 
 ## Removing Images
 
-You can remove images using the `docker rmi` command.
+You can remove images using the `docker image rm` command.
+
+> There is also `docker rmi` which is basically an alias for `docker image rm`.
+> We will stick to `docker image rm` however since it neatly fits into the Docker command hierarchy.
+
+For example, here is how we can remove the `example` image:
+
+```sh
+docker image rm example
+```
+
+If you want to remove all images, you can do:
+
+```sh
+docker image rm $(docker image ls -aq)
+```
+
+Note that you can't remove certain image (e.g. images of a running container).
+If you still wish to do so, you can specify the `-f` flag when doing `docker image rm`.

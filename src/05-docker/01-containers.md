@@ -135,3 +135,21 @@ You can remove a container like this:
 docker stop example
 docker rm example
 ```
+
+## Container Logs
+
+You can retrieve the logs of a container like this:
+
+```sh
+docker logs nginx
+```
+
+## Restart Policies
+
+Docker allows you to specify a restart policy.
+The four main restart policies are:
+
+- `no` (default, don't start container automatically)
+- `always` (always restart a stopped container unless the container was stopped explicitly)
+- `unless-stopped` (restart the container unless the container was in a stopped state before the Docker daemon was stopped)
+- `on-failure` (restart the container if it exited with non-zero or if the Docker daemon restarts)

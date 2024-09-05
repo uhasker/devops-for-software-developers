@@ -10,8 +10,8 @@
 # Docker
 
 - [Docker](./05-docker/README.md)
-  - [Terminology](./05-docker/01-terminology.md)
-  - [Containers](./05-docker/02-containers.md)
-  - [Images](./05-docker/03-images.md)
+  - [Containers](./05-docker/01-containers.md)
+  - [Images](./05-docker/02-images.md)
+  - [Containerizing your First App](./05-docker/03-containerizing-your-first-app.md)
 
 # Kubernetes
