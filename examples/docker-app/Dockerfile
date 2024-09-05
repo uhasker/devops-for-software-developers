@@ -1,10 +1,13 @@
 FROM python:3.9-slim
 
-# Set the working directory inside the container
-WORKDIR /app
+WORKDIR /src
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+COPY ./requirements.txt /src/requirements.txt
 
-# Run the Python script
-CMD ["python", "app.py"]
+RUN python -m pip install --no-cache-dir -r /src/requirements.txt
+
+COPY ./app /src/app
+
+EXPOSE 80
+
+CMD ["fastapi", "run", "app/main.py", "--port", "80"]
