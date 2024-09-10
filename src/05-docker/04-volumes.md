@@ -30,7 +30,7 @@ local     examplevol
 We can also inspect the volume:
 
 ```sh
-docker volume inspect
+docker volume inspect examplevol
 ```
 
 This will output:
