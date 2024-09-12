@@ -1,5 +1,0 @@
-Flask
-Flask-Migrate
-Flask-SQLAlchemy
-gunicorn
-psycopg2-binary
