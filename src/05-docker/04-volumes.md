@@ -85,3 +85,9 @@ You can delete a volume like this:
 ```sh
 docker volume rm examplevol
 ```
+
+Pruning:
+
+```sh
+docker volume prune
+```
