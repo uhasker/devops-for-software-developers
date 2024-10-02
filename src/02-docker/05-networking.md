@@ -146,6 +146,4 @@ Alternatively:
 docker network rm $(docker network ls -q)
 ```
 
-```
-
-```
+TODO: Overlay networking!

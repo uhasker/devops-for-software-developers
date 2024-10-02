@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-DATABASE_URL = "dbname=example user=postgres password=postgres host=exampledb"
+DATABASE_URL = "dbname=exampledb user=postgres password=postgres host=exampledb"
 
 class ResponseModel(BaseModel):
     message: str

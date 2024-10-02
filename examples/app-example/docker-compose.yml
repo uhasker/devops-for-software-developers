@@ -1,0 +1,18 @@
+services:
+  example-app:
+    image: example-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    networks:
+      - example-network
+
+networks:
+  example-network:
+    driver: overlay
