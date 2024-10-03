@@ -27,7 +27,17 @@ nginx        latest    5ef79149e0ec   2 weeks ago     188MB
 
 You can use the `-a` flag to show all images (including the intermediate layers) and the `-q` flag to only show image IDs.
 
+## Inspecting an Image
+
+Just as with container, you can inspect images using the `docker inspect` command:
+
+```sh
+docker inspect nginx
+```
+
 ## Building an Image
+
+> If you're following along in the web version, you can find the example at in the `examples/hello` directory in the accompanying GitHub repository.
 
 Alternatively, you can build an image yourself.
 For that, you'll need application code and a `Dockerfile`.
@@ -53,14 +63,22 @@ CMD ["python", "app.py"]
 We will cover Dockerfiles in more detail later, right now let's just build an image:
 
 ```sh
-docker build -t example .
+docker build -t hello .
 ```
 
-If you now run `docker image ls`, you will see the `example` image as well (along with the `nginx` image we've pulled before):
+As we already covered, you can run the container using the `docker run` command:
+
+```sh
+docker run hello
+```
+
+This container will simply print `Hello, World!` and then stop.
+
+If you now run `docker image ls`, you will see the `hello` image as well (along with the `nginx` image we've pulled before):
 
 ```
 REPOSITORY  TAG       IMAGE ID       CREATED         SIZE
-example     latest    78d35b56c06c   8 seconds ago   125MB
+hello       latest    78d35b56c06c   8 seconds ago   125MB
 nginx       latest    5ef79149e0ec   2 weeks ago     188MB
 ```
 
@@ -79,91 +97,28 @@ docker image pull nginx:1.27.1
 And here is how you can create image with a tag:
 
 ```sh
-docker build -t example:v1 .
+docker build -t hello:1.0.0 .
 ```
 
 Let's again run `docker image ls`, your output should show the two new images:
 
 ```
 REPOSITORY  TAG       IMAGE ID       CREATED         SIZE
-example     latest    78d35b56c06c   4 minutes ago   125MB
-example     v1        78d35b56c06c   4 minutes ago   125MB
+hello       latest    78d35b56c06c   4 minutes ago   125MB
+hello       1.0.0     78d35b56c06c   4 minutes ago   125MB
 nginx       1.27.1    5ef79149e0ec   2 weeks ago     188MB
 nginx       latest    5ef79149e0ec   2 weeks ago     188MB
 ```
 
-## Layers
+You should manually specify tags and never rely on the `latest` tag (since `latest` is just the last image that was created and you have no idea what that might be).
+This goes for both building images and pulling images.
 
-On a purely technical level, an image is nothing more than a collection of layers.
-We can view those layers using the `docker inspect` command.
+Tags should be in the SemVer (semantic versioning) format, i.e. `MAJOR.MINOR.PATCH`.
+Sometimes it's useful to do `MAJOR.MINOR.PATCH-GITSHA` (since that ties the image directly to a specific version of the source code).
 
-For example, to view the layers of our `example:latest` image, we can do this:
+Once an image with a specific tag is pushed to a registry, you should also not overwrite it since that will lead to a lot of confusion.
 
-```sh
-docker inspect example:latest
-```
-
-Among other things, this will include the following output:
-
-```
-"RootFS": {
-    "Type": "layers",
-    "Layers": [
-        "sha256:9853575bc4f955c5892dd64187538a6cd02dba6968eba9201854876a7a257034",
-        "sha256:414698da489a5dd0db700cca4a87b7ca20dbc0fbefea813ca0bc9ff4f409e73f",
-        "sha256:0900caae955e95ff03870e8180acee583299482dc1a9225429d9f897c753c0bf",
-        "sha256:8657193c8651e10f63a6d1f63e23b736ed2905be949907750755e1f3357bc873",
-        "sha256:d24f9dbb0a3ab7f7accbcf58fb79f7ba475e598a4c164ec1c569c48887f9ca94",
-        "sha256:74ebc255d70104e40a6a2f9f89c7775b9bbe985f64761d7e15f80246df4341a1",
-        "sha256:6bfd14ad8ccc8b286d3a639fb289f9470055fe73c562b0f7d0092d6d5501fe42"
-    ]
-}
-```
-
-The layers are sorted top to bottom, i.e. `9853...` is the base layer, followed by the layer `4146...` and so on.
-If you're on a regular Linux system and you use the `overlay2` driver, you can find the actual files at `/var/lib/docker/image/overlay2/layerdb/sha256/...`.
-
-For example, let's inspect the base layer of the `example:latest` image:
-
-```sh
-sudo ls /var/lib/docker/image/overlay2/layerdb/sha256/9853575bc4f955c5892dd64187538a6cd02dba6968eba9201854876a7a257034
-```
-
-Among other things, the output will show a `cache-id` file:
-
-```
-cache-id  diff	size  tar-split.json.gz
-```
-
-Let's look at it:
-
-```sh
-sudo cat /var/lib/docker/image/overlay2/layerdb/sha256/9853575bc4f955c5892dd64187538a6cd02dba6968eba9201854876a7a257034/cache-id
-```
-
-The result will be:
-
-```
-8c1792bbae4483c0a4b5664c5e9b5cda891f295399442b2a98474de7854ee257
-```
-
-Finally, we can inspect:
-
-```sh
-sudo ls /var/lib/docker/overlay2/8c1792bbae4483c0a4b5664c5e9b5cda891f295399442b2a98474de7854ee257
-```
-
-The output will be:
-
-```
-committed  diff  link
-```
-
-And the `diff` directory has the actual filesystem differences introduced by the layer.
-
-## Official and Unofficial Images
-
-It's worth knowing that some images are "official".
+From now on, we will always use specific tags and never rely on the `latest` tag.
 
 ## Removing Images
 
@@ -184,5 +139,133 @@ If you want to remove all images, you can do:
 docker image rm $(docker image ls -aq)
 ```
 
-Note that you can't remove certain image (e.g. images of a running container).
-If you still wish to do so, you can specify the `-f` flag when doing `docker image rm`.
+Note that you can't remove certain images (e.g. images of a running container).
+If you still wish to do so, you can specify the `-f` flag when executing `docker image rm`.
+
+## Layers
+
+On a purely technical level, an image is nothing more than a collection of layers.
+To better understand this process conceptually, we will rebuild the `hello` image without Docker BuildKit (because BuildKit introduces a lot of optimizations which will confuse us conceptually):
+
+```sh
+DOCKER_BUILDKIT=0 docker build -t hello:1.0.0 .
+```
+
+Let's now export the image as a tarball:
+
+```sh
+docker save -o hello_image.tar hello:1.0.0
+```
+
+Unpack the tarball:
+
+```sh
+tar -xvf hello_image.tar
+```
+
+Inside you'll find a `manifest.json` file that contains the layers:
+
+```json
+[
+  {
+    "Config": "blobs/sha256/bd936f5d46cf5977732cb6bd1e00e09b9c42675f51a2115cede89b22d603ac08",
+    "RepoTags": ["hello:1.0.0"],
+    "Layers": [
+      "blobs/sha256/8d853c8add5d1e7b0aafc4b68a3d9fb8e7a0da27970c2acf831fe63be4a0cd2c",
+      "blobs/sha256/fb5ccd0db472b0b9feb557d01e6c39097acc9ad1a502e1e6a29fde48d74eb7b0",
+      "blobs/sha256/e228adf1886f79aec8c40dff455c30bab317b17ce3ae3dce4fea87d6f18687d2",
+      "blobs/sha256/9e599118e168a6c61d9766a48fe656725ffdf0ab38d135d49abee6767213efc4",
+      "blobs/sha256/61399dbf1da52f8ccb215425621f8d09e41a2166f3f49a992bb1da53188b64c8",
+      "blobs/sha256/fb06e4157373373ad0eac405c0e3f78f77e90f7b0f98813825c80fac1620a979"
+    ],
+    "LayerSources": {
+      "sha256:61399dbf1da52f8ccb215425621f8d09e41a2166f3f49a992bb1da53188b64c8": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 1536,
+        "digest": "sha256:61399dbf1da52f8ccb215425621f8d09e41a2166f3f49a992bb1da53188b64c8"
+      },
+      "sha256:8d853c8add5d1e7b0aafc4b68a3d9fb8e7a0da27970c2acf831fe63be4a0cd2c": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 77832192,
+        "digest": "sha256:8d853c8add5d1e7b0aafc4b68a3d9fb8e7a0da27970c2acf831fe63be4a0cd2c"
+      },
+      "sha256:9e599118e168a6c61d9766a48fe656725ffdf0ab38d135d49abee6767213efc4": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 5120,
+        "digest": "sha256:9e599118e168a6c61d9766a48fe656725ffdf0ab38d135d49abee6767213efc4"
+      },
+      "sha256:e228adf1886f79aec8c40dff455c30bab317b17ce3ae3dce4fea87d6f18687d2": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 42818560,
+        "digest": "sha256:e228adf1886f79aec8c40dff455c30bab317b17ce3ae3dce4fea87d6f18687d2"
+      },
+      "sha256:fb06e4157373373ad0eac405c0e3f78f77e90f7b0f98813825c80fac1620a979": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 4608,
+        "digest": "sha256:fb06e4157373373ad0eac405c0e3f78f77e90f7b0f98813825c80fac1620a979"
+      },
+      "sha256:fb5ccd0db472b0b9feb557d01e6c39097acc9ad1a502e1e6a29fde48d74eb7b0": {
+        "mediaType": "application/vnd.oci.image.layer.v1.tar",
+        "size": 9551360,
+        "digest": "sha256:fb5ccd0db472b0b9feb557d01e6c39097acc9ad1a502e1e6a29fde48d74eb7b0"
+      }
+    }
+  }
+]
+```
+
+Each layer introduces a filesystem diff.
+You can see the diffs by inspecting the tarball located in `blobs/sha256`.
+
+Let's look at the first layer:
+
+```sh
+tar -tf blobs/sha256/8d853c8add5d1e7b0aafc4b68a3d9fb8e7a0da27970c2acf831fe63be4a0cd2c
+```
+
+This will simply contain a regular Linux file system.
+
+The penultimate layer contains the `app` directory:
+
+```sh
+tar -tf blobs/sha256/61399dbf1da52f8ccb215425621f8d09e41a2166f3f49a992bb1da53188b64c8
+```
+
+The output will be:
+
+```sh
+app/
+```
+
+Finally, we can have a look at the last layer:
+
+```console
+$ tar -tf blobs/sha256/fb06e4157373373ad0eac405c0e3f78f77e90f7b0f98813825c80fac1620a979
+app/
+app/Dockerfile
+app/README.md
+app/app.py
+```
+
+## Inspecting the File System
+
+It's often helpful to inspect an image without creating a container from it (especially when your problem is that the created container crashes immediately).
+
+You can use `docker create` to create a new container from a specified image without starting it:
+
+```sh
+docker container create
+```
+
+Find out the container ID with `docker ps`.
+You can the use `docker container export` to export the created container's filesystem as a tar archive:
+
+```sh
+docker container export $CONTAINER_ID -o hello_fs.tar
+```
+
+You can now have a look at the archive to view the final filesystem of the image:
+
+```sh
+tar -tvf hello_fs.tar
+```

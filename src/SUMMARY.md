@@ -11,7 +11,7 @@
 
   - [Containers](./02-docker/01-containers.md)
   - [Images](./02-docker/02-images.md)
-  - [Containerizing your First App](./02-docker/03-containerizing-your-first-app.md)
+  - [Dockerfiles](./02-docker/03-dockerfiles.md)
   - [Volumes](./02-docker/04-volumes.md)
   - [Networking](./02-docker/05-networking.md)
   - [Multi-Container Applications](./02-docker/06-multi-container-applications.md)
