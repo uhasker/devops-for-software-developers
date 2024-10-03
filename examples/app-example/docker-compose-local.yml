@@ -1,0 +1,17 @@
+services:
+  example-app:
+    image: example-app:1.0.0
+    pull_policy: never
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    networks:
+      - example-network
+
+networks:
+  example-network:
+    driver: bridge

@@ -8,16 +8,16 @@ Containers share the OS, i.e. you install an engine on top of your OS and start 
 
 ## Starting a Container
 
-Container are based on images.
-We will discuss images on more detail in the next section, but basically they're blueprints for containers.
+Containers are commonly based on images.
+We will discuss images in more detail in the next section, but basically they're blueprints for containers.
 
-Let's start a container from the `nginx` image:
+Let's create a container from the `nginx` image:
 
 ```sh
 docker run -d --name example -p 8080:80 nginx
 ```
 
-Let's have a closer look at the command:
+We can have a closer look at the command:
 
 - `docker run` tells Docker to run a new container
 - `-d` tells Docker to run the container in the background as a daemon process
@@ -31,7 +31,7 @@ Let's check that the container is running:
 docker ps
 ```
 
-The output is something like:
+The output will be something like:
 
 ```
 CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                                   NAMES
@@ -50,17 +50,17 @@ docker exec example ps
 
 This command can take additional flags, the most useful of which are `-i` and `-t`.
 The `-i` (short for `--interactive`) flag will keep the container's STDIN open even if not attached.
-This ensure that the process remains interactive, i.e. you can type and send commands to it.
+This ensures that the process remains interactive, i.e. you can type and send commands to it.
 The `-t` (short for `--tty`) will allocate a pseudo-TTY which makes Docker emulate a terminal session (providing features like line buffering and interactive command input).
 
 Combining the flags allows you to start a `bash` shell inside a container.
-This is a very powerful feature and allows you to debug problems of a running container very quickly:
+This is a very powerful feature and allows you to debug container problems very quickly:
 
 ```sh
 docker exec -it example /bin/bash
 ```
 
-Try executing a few common Linux commands.
+Try executing a few common Linux commands inside the container now.
 Note that not all of them will work because container images are usually optimized for being small and so often don't have all packages installed.
 
 For example, the `nginx` container doesn't have the `ps` command:
@@ -70,7 +70,7 @@ root@7b5a7dce6f39:/# ps
 bash: ps: command not found
 ```
 
-However, most containers ship with a package manager, so you can install the tools you need.
+However, most containers ship with a package manager, so you can quite easily install the tools you need.
 For example, you can get the `ps` command by installing `procps`:
 
 ```sh
@@ -86,25 +86,14 @@ root@7b5a7dce6f39:/# ps -ax
       1 ?        Ss     0:00 nginx: master process nginx -g daemon off;
      29 ?        S      0:00 nginx: worker process
      30 ?        S      0:00 nginx: worker process
-     31 ?        S      0:00 nginx: worker process
-     32 ?        S      0:00 nginx: worker process
-     33 ?        S      0:00 nginx: worker process
-     34 ?        S      0:00 nginx: worker process
-     35 ?        S      0:00 nginx: worker process
-     36 ?        S      0:00 nginx: worker process
-     37 ?        S      0:00 nginx: worker process
-     38 ?        S      0:00 nginx: worker process
-     39 ?        S      0:00 nginx: worker process
-     40 ?        S      0:00 nginx: worker process
-     41 ?        S      0:00 nginx: worker process
-     42 ?        S      0:00 nginx: worker process
-     43 ?        S      0:00 nginx: worker process
-     44 ?        S      0:00 nginx: worker process
+    -SNIP-
     264 pts/0    Ss     0:00 /bin/bash
     270 pts/0    R+     0:00 ps -ax
 ```
 
 We see that there is an `nginx` process running together with a bunch of worker processes.
+Note that the amount of processes running in a container is usually much less than the amount of process on your host machine.
+That makes sense since a container usually exists to perform a single task (like running a web server), where as your host machine usually has to do a lot of different things at the same time.
 
 ## Inspecting a Container
 
@@ -140,6 +129,7 @@ You can also restart the container with `docker restart`.
 
 Note that stopping a container won't lose changes that you've made inside the container.
 Nevertheless, you should generally not make changes to a running container and treat containers as immutable objects instead.
+We will see why that's important when we start orchestrating containers later.
 
 You can remove a container like this:
 
@@ -156,6 +146,11 @@ You can retrieve the logs of a container like this:
 docker logs example
 ```
 
+Note that `docker logs` works even when a container is stopped.
+This means that this command is very useful to debug why a container has crashed (assuming your application produces useful logs).
+
+The `docker exec` and `docker logs` are the two most useful commands to debug container problems.
+
 You can follow the logs by passing the `-f` flag:
 
 ```sh
@@ -171,3 +166,5 @@ The four main restart policies are:
 - `always` (always restart a stopped container unless the container was stopped explicitly)
 - `unless-stopped` (restart the container unless the container was in a stopped state before the Docker daemon was stopped)
 - `on-failure` (restart the container if it exited with non-zero or if the Docker daemon restarts)
+
+We will return to restart policies in more detail later.

@@ -1,8 +1,15 @@
 # Networking
 
-## CNM Terminology
+## Terminology
 
-CNM = Container Network Model
+Most applications consists of multiple services.
+Therefore, you will usually need to run multiple containers when deploying applications.
+Networking plays a crucial role in allowing containers to communicate with each other.
+
+Docker provides several networking options.
+The **Container Network Model (CNM)** forms the core of Docker’s networking architecture.
+
+We will need to introduce a few important concepts first.
 
 A sandbox is an isolated network stack that includes things like Ethernet interfaces, ports, routing tables (and everything else you would expect from a network stack).
 
@@ -11,6 +18,10 @@ It behaves exactly like a regular network adapter (physical network interface), 
 
 A network is a virtual switch (usually an implementation of a 802.1d bridge).
 They group together and isolate endpoints that need to communicate.
+
+In this chapter, we will only talk about bridge networks.
+Docker supports other networks (including the overlay network) as well.
+We will discuss some of these other options later.
 
 ## Single-Host Bridge Networks
 
@@ -144,8 +155,4 @@ Alternatively:
 
 ```sh
 docker network rm $(docker network ls -q)
-```
-
-```
-
 ```
