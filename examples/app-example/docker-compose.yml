@@ -1,12 +1,25 @@
 services:
   example-app:
-    image: example-app:1.0.0
+    image: example-app:2.0.0
     ports:
-      - "8000:80"
+      - "8080:80"
     deploy:
       replicas: 3
       restart_policy:
         condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: rollback
+        monitor: 30s
+        max_failure_ratio: 0
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+        failure_action: pause
+        monitor: 30s
+        max_failure_ratio: 0
     networks:
       - example-network
 
