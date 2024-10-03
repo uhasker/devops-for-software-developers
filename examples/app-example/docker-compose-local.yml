@@ -1,10 +1,12 @@
 services:
   example-app:
     image: example-app:1.0.0
+    pull_policy: never
+    build:
+      context: .
     ports:
       - "8000:80"
     deploy:
-      replicas: 3
       restart_policy:
         condition: on-failure
     networks:
@@ -12,4 +14,4 @@ services:
 
 networks:
   example-network:
-    driver: overlay
+    driver: bridge

@@ -52,6 +52,12 @@ fastapi[standard]==0.113.0
 uvicorn==0.30.6
 ```
 
+You can build the image like this:
+
+```sh
+docker build -t example-app:1.0.0 .
+```
+
 ## Basic Instructions
 
 Let's go over the most important basic instructions step by step.
