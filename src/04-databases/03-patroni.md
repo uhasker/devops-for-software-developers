@@ -13,11 +13,13 @@ Install dependencies on each machine:
 python -m pip install patroni[etcd,psycopg2-binary]
 ```
 
+-SNIP-
+
 Create a `patroni.yml` config file:
 
 ```yml
 scope: patroni-cluster
-namespace: /service
+# namespace: /service/
 name: primary
 
 restapi:
@@ -47,9 +49,9 @@ bootstrap:
 postgresql:
   listen: 0.0.0.0:5432
   connect_address: 10.0.0.1:5432
-  data_dir: /var/lib/postgresql/12/main
-  config_dir: /etc/postgresql/12/main
-  bin_dir: /usr/lib/postgresql/12/bin
+  data_dir: /var/lib/postgresql/16/main
+  config_dir: /etc/postgresql/16/main
+  bin_dir: /usr/lib/postgresql/16/bin
   pgpass: /tmp/pgpass
   authentication:
     superuser:
