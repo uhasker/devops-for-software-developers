@@ -2,7 +2,7 @@
 
 ## File System Level Backup
 
-There are two restrictions, however, which make this method impractical, or at least inferior to the pg_dump method:
+There are two restrictions, which make this method impractical, or at least inferior to the pg_dump method:
 
 The database server must be shut down in order to get a usable backup.
 Half-way measures such as disallowing all connections will not work (in part because tar and similar tools do not take an atomic snapshot of the state of the file system, but also because of internal buffering within the server).
